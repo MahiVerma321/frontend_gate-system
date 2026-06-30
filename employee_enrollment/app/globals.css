@@ -1,0 +1,77 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background: black;
+  color: white;
+  overflow-x: hidden;
+
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ==========================================================
+   SecureVision Profile Animations
+========================================================== */
+
+@keyframes avatarPulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.18;
+  }
+
+  50% {
+    transform: scale(1.06);
+    opacity: 0.35;
+  }
+}
+
+@keyframes scanLine {
+  0% {
+    top: -20%;
+    opacity: 0;
+  }
+
+  10% {
+    opacity: 1;
+  }
+
+  90% {
+    opacity: 1;
+  }
+
+  100% {
+    top: 120%;
+    opacity: 0;
+  }
+}
+
+@keyframes borderRotate {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-avatar-pulse {
+  animation: avatarPulse 4s ease-in-out infinite;
+}
+
+.animate-scan-line {
+  animation: scanLine 4.5s linear infinite;
+}
+
+.animate-border {
+  animation: borderRotate 18s linear infinite;
+}
