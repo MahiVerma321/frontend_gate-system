@@ -20,14 +20,14 @@ export default function AuthCard({
   const [showPassword, setShowPassword] = useState(false);
   const [remember, setRemember] = useState(false);
   const [form, setForm] = useState({
-  fullName: "",
+  name: "",
   email: "",
   password: "",
   confirmPassword: "",
 });
 const router = useRouter();
 const [errors, setErrors] = useState({
-  fullName: "",
+  name: "",
   email: "",
   password: "",
   confirmPassword: "",
@@ -61,8 +61,8 @@ const passwordChecks = {
 const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
 
-  const handleSubmit = async (
-  e: React.FormEvent<HTMLFormElement>
+const handleSubmit = async (
+  e: FormEvent<HTMLFormElement>
 ) => {
 
   e.preventDefault();
@@ -71,56 +71,101 @@ const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   try {
 
-    const payload = {
-      fullName: form.fullName.trim(),
-      email: form.email.trim().toLowerCase(),
-      password: form.password,
-    };
+    const endpoint = isSignIn
+      ? "/api/auth/login"
+      : "/api/auth/register";
 
-    // backend later
+    const body = isSignIn
+      ? {
+          email: form.email.trim().toLowerCase(),
+          password: form.password,
+        }
+      : {
+          name: form.name.trim(),
+          email: form.email.trim().toLowerCase(),
+          password: form.password,
+          confirmPassword:
+            form.confirmPassword,
+        };
+
+    const response = await fetch(
+      endpoint,
+      {
+        method: "POST",
+
+        headers: {
+          "Content-Type":
+            "application/json",
+        },
+
+        body: JSON.stringify(body),
+      }
+    );
+
+    const data =
+      await response.json();
+
+    if (!response.ok) {
+
+      const errorMessage =
+  typeof data.error === "string"
+    ? data.error
+    : typeof data.message === "string"
+    ? data.message
+    : "Authentication failed.";
+
+toast.error(errorMessage);
+
+      return;
+    }
 
     if (isSignIn) {
 
-  localStorage.setItem(
-    "securevision-user",
-    JSON.stringify({
-      fullName:
-        form.fullName || "Admin",
-      email: form.email,
-    })
-  );
+      const storage =
+  remember
+    ? localStorage
+    : sessionStorage;
 
-  toast.success("Signed in successfully!");
+storage.setItem(
+  "token",
+  data.token
+);
 
-  router.push("/dashboard");
+storage.setItem(
+  "securevision-user",
+  JSON.stringify(data.user)
+);
 
-} else {
+      localStorage.setItem(
+        "securevision-user",
+        JSON.stringify(data.user)
+      );
 
-  toast.success(
-    "Account created successfully! Please sign in."
-  );
+      toast.success(
+        "Welcome back!"
+      );
 
-  setTab("signin");
+      router.push("/dashboard");
 
-}
-
-    if (!isSignIn) {
-      setForm({
-        fullName: "",
-        email: "",
-        password: "",
-        confirmPassword: "",
-      });
-
-      setErrors({
-        fullName: "",
-        email: "",
-        password: "",
-        confirmPassword: "",
-      });
+      return;
     }
 
-  } catch {
+    toast.success(
+      "Account created successfully."
+    );
+
+    setTab("signin");
+
+    setForm({
+      name: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+    });
+
+  } catch (err) {
+
+    console.error(err);
 
     toast.error(
       isSignIn
@@ -136,7 +181,7 @@ const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
 };
 
-  const handleFullNameChange = (
+  const handleNameChange = (
   e: React.ChangeEvent<HTMLInputElement>
 ) => {
 
@@ -144,14 +189,14 @@ const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   setForm(prev => ({
     ...prev,
-    fullName: value,
+    name: value,
   }));
 
   if (!value.trim()) {
 
     setErrors(prev => ({
       ...prev,
-      fullName: "Full name is required.",
+      name: "Name is required.",
     }));
 
     return;
@@ -161,7 +206,7 @@ const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
     setErrors(prev => ({
       ...prev,
-      fullName:
+      name:
         "Only letters, spaces, hyphens and apostrophes are allowed.",
     }));
 
@@ -170,7 +215,7 @@ const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   setErrors(prev => ({
     ...prev,
-    fullName: "",
+    name: "",
   }));
 };
 
@@ -312,11 +357,11 @@ useEffect(() => {
 }, [form.password, form.confirmPassword, isSignIn]);
 
 const isSignUpValid =
-  form.fullName.trim() &&
+  form.name.trim() &&
   form.email.trim() &&
   form.password &&
   form.confirmPassword &&
-  !errors.fullName &&
+  !errors.name &&
   !errors.email &&
   !errors.password &&
   !errors.confirmPassword;
@@ -764,16 +809,16 @@ to-[#2BCF69] shadow-[0_8px_25px_rgba(34,197,94,.18)] hover:shadow-[0_12px_30px_r
             {!isSignIn && (
               <Field label="Full Name">
                 <FieldInput name="fullName" type="text" placeholder="Jane Doe" icon={<Mail className="h-[18px] w-[18px]" />} 
-                value={form.fullName}
-                error={!!errors.fullName}
-                onChange={handleFullNameChange}
+                value={form.name}
+                error={!!errors.name}
+                onChange={handleNameChange}
 />
 
-{errors.fullName && (
+{errors.name && (
 
 <p className="mt-2 text-xs text-red-400">
 
-    {errors.fullName}
+    {errors.name}
 
 </p>
 

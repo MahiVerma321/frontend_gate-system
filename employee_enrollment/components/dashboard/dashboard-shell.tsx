@@ -31,7 +31,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
       >
         <TopNav onToggleSidebar={() => setOpen((v) => !v)} sidebarOpen={open} />
 
-        <main className="flex flex-col gap-4 p-5 md:p-8">{children}</main>
+        <main className="flex flex-1 flex-col gap-4 p-5 md:p-8">{children}</main>
       </div>
     </div>
   )

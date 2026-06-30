@@ -7,10 +7,10 @@ import {connectDB} from "@/middleware/mongodb";
 import User from "@/models/Users";
 
 const registerSchema = z.object({
-    userName: z.string().min(3).max(20),
-    email: z.string().email(),
-    password: z.string().min(8),
-    confirmPassword: z.string().min(8),
+  name: z.string().min(3).max(20),
+  email: z.string().email(),
+  password: z.string().min(8),
+  confirmPassword: z.string().min(8),
 }).refine((data) => data.password === data.confirmPassword, {
     message: "Passwords do not match",
 });
@@ -23,10 +23,21 @@ export async function POST(req: NextRequest) {
     const validatedData = registerSchema.safeParse(body); 
 
     if (!validatedData.success) {
-        return NextResponse.json({ error: "Invalid input data" }, { status: 400 });
+        console.error("Validation errors:", validatedData.error.flatten());
+    return NextResponse.json(
+    {
+      success: false,
+      message:
+        validatedData.error.issues[0]?.message ??
+        "Invalid input.",
+    },
+    {
+      status: 400,
     }
+  );
+}
 
-    const { userName, email, password} = validatedData.data;
+    const { name, email, password} = validatedData.data;
 
     try {
         const existingUser = await User.findOne({ email });
@@ -35,7 +46,11 @@ export async function POST(req: NextRequest) {
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
-        const newUser = new User({ userName, email, password: hashedPassword });
+        const newUser = new User({
+  name: name,
+  email: email.toLowerCase(),
+  password: hashedPassword,
+});
         await newUser.save();
 
         const secret = process.env.JWT_SECRET;
@@ -44,17 +59,21 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: "JWT secret is not defined" }, { status: 500 });
         }   
 
-        const token = jwt.sign({
-            userId: newUser._id,
-            userName: newUser.userName,
-            email: newUser.email,
-        }, secret, { expiresIn: '1h' });
+        const token = jwt.sign(
+  {
+    userId: newUser._id.toString(),
+    userName: newUser.name,
+    email: newUser.email,
+  },
+  secret,
+  { expiresIn: "1h" }
+);
 
         return NextResponse.json({ message: "Registration successful", 
             token, 
             user: {
                 userId: newUser._id,
-                userName: newUser.userName,
+                name: newUser.name,
                 email: newUser.email,
             } },
 

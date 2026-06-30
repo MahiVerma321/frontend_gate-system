@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { InputField } from "@/components/ui/input-field";
 import { useEffect, useState } from "react";
+import { useEmployees } from "@/context/employee-context";
 
 type Props = {
   employee: EmployeeListItem;
@@ -107,39 +108,51 @@ if (!form) return null;
     return;
   }
 
+  setLoading(true);
+
    try {
-    setLoading(true);
 
     const res = await fetch(
-      `http://localhost:8000/employees/${form.id}`,
+      "/api/employees/update",
       {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          name: form.name.trim(),
-          email: form.email.trim(),
-          accountStatus: form.accountStatus,
+      employeeId: form.id,
+      name: form.name.trim(),
+      email: form.email.trim(),
+      accountStatus: form.accountStatus,
         }),
       }
     );
 
-    if (!res.ok) throw new Error("Failed to update employee");
+    const data = await res.json();
 
-    const updated = await res.json();
+if (!res.ok || !data.success) {
+    toast.error(
+        data.message ??
+        "Failed to update employee."
+    );
+    return;
+}
 
     toast.success("Employee updated successfully.");
+    handleClose();
+    
+  } catch (error: any) {
+    toast.error(
+        error?.message ??
+        "Failed to update employee."
+    );
 
-    onSave?.(updated);
-    onClose();
-  } catch (err) {
-    console.error(err);
-    toast.error("Update failed");
-  } finally {
+}
+finally{
+
     setLoading(false);
-  }
-};
+
+}
 
 //  const cleanedEmployee = {
 //  ...form,
@@ -156,9 +169,14 @@ if (!form) return null;
 //};
 
 const hasChanges =
-  form.name.trim() !== employee.name.trim() ||
-  form.email.trim().toLowerCase() !== employee.email.trim().toLowerCase() ||
-  form.accountStatus !== employee.accountStatus;
+    form.name.trim() !==
+        employee.name.trim() ||
+
+    form.email.trim().toLowerCase() !==
+        employee.email.trim().toLowerCase() ||
+
+    form.accountStatus !==
+        employee.accountStatus;
 
   return (
     <BaseModal
@@ -224,10 +242,14 @@ hover:bg-white/[0.08]
   onChange={(e) => {
   const value = e.target.value;
 
-  setForm(prev => ({
-    ...form,
-    name: value,
-  }));
+  setForm(prev =>
+    prev
+        ? {
+              ...prev,
+              name: value,
+          }
+        : prev
+);
 
   if (!value.trim()) {
     setErrors(prev => ({
@@ -260,10 +282,14 @@ hover:bg-white/[0.08]
   onChange={(e) => {
   const value = e.target.value;
 
-  setForm({
-    ...form,
-    email: value,
-  });
+  setForm(prev =>
+    prev
+        ? {
+              ...prev,
+              email: value,
+          }
+        : prev
+);
 
   if (!value.trim()) {
     setErrors(prev => ({
@@ -376,4 +402,4 @@ type FieldProps = {
   onChange: (
     e: React.ChangeEvent<HTMLInputElement>
   ) => void;
-};
+}}

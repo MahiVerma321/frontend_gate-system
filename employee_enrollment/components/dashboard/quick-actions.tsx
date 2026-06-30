@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { UserPlus, FileText, ScrollText, Settings } from "lucide-react";
 import Link from "next/link";
 
@@ -45,16 +44,14 @@ type QuickActionsProps = {
 export function QuickActions({
   onAddEmployee,
 }: QuickActionsProps) {
-
   return (
-
-    <GlassCard tint="violet" className="flex h-full flex-col p-5">
+    <GlassCard tint="violet" className="flex w-full flex-col p-5">
       <h2 className="text-sm font-semibold">Quick Actions</h2>
       <p className="mt-0.5 text-xs text-muted-foreground">
         Common security tasks
       </p>
 
-      <div className="mt-4 grid flex-1 grid-cols-1 gap-2 sm:grid-cols-2">
+      <div className="mt-4 grid w-full grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
         {actions.map((action) => {
   const card = (
     <>
@@ -125,7 +122,6 @@ export function QuickActions({
   );
 })}
       </div>
-
     </GlassCard>
-  )
+  );
 }

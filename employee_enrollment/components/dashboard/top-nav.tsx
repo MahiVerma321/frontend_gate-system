@@ -22,7 +22,7 @@ export function TopNav({
   const [menuOpen, setMenuOpen] = useState(false);
   
   const menuRef = useRef<HTMLDivElement>(null);
-  const [userName, setUserName] = useState("Admin");
+  const [name, setUserName] = useState("Admin");
     useEffect(() => {
 
   const stored =
@@ -40,7 +40,7 @@ export function TopNav({
 
 }, []);
 
-  const initials = userName
+  const initials = name
   .split(" ")
   .map((word) => word[0])
   .join("")
@@ -96,7 +96,7 @@ useEffect(() => {
         </button>
         <div className="min-w-0">
           <h1 className="flex items-center gap-2 text-lg font-semibold tracking-tight text-balance">
-            Welcome back, {userName}! <span aria-hidden>👋</span>
+            Welcome back, {name}! <span aria-hidden>👋</span>
           </h1>
           <p className="mt-0.5 flex items-center gap-1.5 text-sm text-muted-foreground">
             <ShieldCheck className="size-3.5 text-success" />
@@ -131,7 +131,7 @@ useEffect(() => {
             {initials}
           </span>
           <span className="hidden text-left leading-tight sm:block">
-            <span className="block text-xs font-medium">{userName}</span>
+            <span className="block text-xs font-medium">{name}</span>
             <span className="block text-[11px] text-muted-foreground">
               Admin
             </span>
